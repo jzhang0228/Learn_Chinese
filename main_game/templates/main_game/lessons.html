@@ -1,0 +1,29 @@
+{% extends 'main_game/base.html'%}
+{% load static %}
+
+{% block extra_script %}
+{% endblock %}
+
+
+{% block main_body %}
+  <div class="container-fluid">
+    {% for lesson in lessons %}
+    <a href="{% url 'lesson' lesson.id %}">
+      <div class="lesson-card">
+        <div class="lesson-body"
+          {% if lesson.image %}
+            style="background-image: url('{{ lesson.image.url }}')"
+          {% endif %}
+        >
+          {% if not lesson.image %}
+            <div class="lesson-text">{{ lesson.text }}</div>
+          {% endif %}
+        </div>
+        <div class="lesson-title">
+          <h4>{{ lesson.title }}</h4>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+{% endblock %}

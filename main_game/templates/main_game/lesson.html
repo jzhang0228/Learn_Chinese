@@ -1,0 +1,77 @@
+{% extends 'main_game/base.html'%}
+{% load static %}
+
+{% block extra_script %}
+  <script src="{% static 'js/learn.js' %}"></script>
+  <script>
+    var text = '{{ plain_text | safe }}';
+  </script>
+{% endblock %}
+
+
+{% block main_body %}
+<div id="background"
+  {% if lesson.image %}
+    style="background-image:url('{{ lesson.image.url }}')"
+  {% endif %}>
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div class="audio-buttons clearfix">
+        {% if lesson.audio %}
+          <div class="pull-left audio-title">Chinese</div>
+          <audio controls class="pull-left">
+            <source src="{{ lesson.audio.url }}"
+              {% if audio_extension %}
+              type="audio/{{ audio_extension }}"
+              {% endif %}
+            >
+          </audio>
+        {% endif %}
+        {% if lesson.english_audio %}
+          <div class="pull-left audio-title">English</div>
+          <audio controls>
+            <source src="{{ lesson.english_audio.url }}"
+              {% if english_audio_extension %}
+              type="audio/{{ english_audio_extension }}"
+              {% endif %}
+            >
+          </audio>
+        {% endif %}
+      </div>
+    </div>
+    <div class="row-fluid text-right">
+      <button type="button" class="btn btn-success btn-lg ready-button">Ready! Go!</button>
+      <span class="check-result hide">
+        <span class="glyphicon glyphicon-check text-success" aria-hidden="true">
+          <div class="check-result-number">0</div>
+        </span>
+        <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true">
+          <div class="check-result-number">0</div>
+        </span>
+      </span>
+      <a href="{% url 'lessons' %}" class="btn btn-default btn-lg">
+        <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+      </a>
+    </div>
+    <div class="row-fluid hide action-buttons">
+      <button id="startButton" type="button" class="btn btn-success btn-lg">Start</button>
+      <button id="checkButton" type="button" class="btn btn-success btn-lg" disabled="disabled">Check</button>
+      <button id="nextButton" type="button" class="btn btn-success btn-lg" disabled="disabled">Next</button>
+    </div>
+    <div class="row-fluid">
+      <h2 class="text-background"><span>{{ lesson.title }}</span></h2>
+    </div>
+    <div class="row">
+      <div id="main" class="col-md-10">
+        <div id="originalText" class="text-background">
+          {{ lesson.text | linebreaks}}
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div id="sentence" class="col-md-10"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
