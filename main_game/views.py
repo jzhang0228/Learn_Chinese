@@ -113,22 +113,17 @@ class PracticeView(View):
     def post(self, request):
         client = OpenAI()
         character = request.POST.get("character", "好")
-        # response = client.responses.create(
-        #     model="gpt-4.1",
-        #     input="""
-        #         Write a Chinese sentence with '%s‘ with less than 10 characters.
-        #         Only output generated sentence, pinyin and English translation in
-        #         JSON format with keys: sentence, pinyin and english.
-        #     """ % character,
-        # )
+        response = client.responses.create(
+            model="gpt-4.1",
+            input="""
+                Write a Chinese sentence with '%s‘ with less than 10 characters.
+                Only output generated sentence, pinyin and English translation in
+                JSON format with keys: sentence, pinyin and english.
+            """
+            % character,
+        )
 
-        # response_dict = json.loads(response.output_text)
-        response_dict = {
-            "sentence": "我喜欢咖啡,你呢？",
-            "pinyin": "wǒ xǐ huān hē kā fēi.",
-            "english": "I like to drink coffee.",
-        }
-        print(response_dict)
+        response_dict = json.loads(response.output_text)
 
         random_number = random.randint(1, 10)
         audio_filename = "uploads/speech/%i.mp3" % random_number
@@ -146,10 +141,6 @@ class PracticeView(View):
         ) as response:
             response.stream_to_file(file_path)
 
-        print(response_dict["sentence"])
-        print(response_dict["pinyin"])
-        print(response_dict["english"])
-
         context = {
             "sentence": response_dict["sentence"],
             "pinyin": response_dict["pinyin"],
@@ -157,6 +148,5 @@ class PracticeView(View):
             "speech": meida_file_path,
             "plain_text": get_sentence(response_dict["sentence"]),
         }
-        print(context["plain_text"])
 
         return JsonResponse(context)
