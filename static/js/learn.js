@@ -34,6 +34,7 @@
 
   function setCharacters(characters, selector, getHtmlCallBack) {
     var $container = $(selector);
+    console.log(selector);
     $container.html('');
     for (var i = 0; i < characters.length; i++) {
       var html = getHtmlCallBack(characters[i], i);
@@ -46,6 +47,7 @@
     $('#startButton').removeAttr('disabled');
     $('#nextButton').attr('disabled', 'disabled');
     $('.character-container .glyphicon').addClass('hide');
+    $('#originalText').html('');
   }
 
   function startPlay(sentence) {
@@ -166,9 +168,10 @@
     }, DURATION);
   }
 
-  $( document ).ready(function() {
+  function initPlay() {
     var index = 0;
     var sentences = JSON.parse(text);
+
     $(".ready-button").on('click touchstart', function(event) {
       $(this).addClass('hide');
       $(".action-buttons, .check-result").removeClass('hide');
@@ -180,6 +183,7 @@
         return;
       }
       startPlay(sentences[index]);
+      console.log(sentences[index]);
     });
 
     $("#checkButton").on('click touchstart', function(event) {
@@ -202,6 +206,59 @@
         newPlay(sentences[index]);
       }
     });
+  }
+
+  function clearOldGame() {
+    $(".ready-button").removeClass('hide');
+    $(".action-buttons, .check-result").addClass('hide');
+    $("#startButton").removeClass('hide');
+    $("#startButton").removeAttr('disabled');
+    $("#checkButton").attr('disabled', 'disabled');
+    $("#nextButton").attr('disabled', 'disabled');
+    $("#sentence").html('');
+    $('#main').html('');
+  }
+
+  function initFormSubmission() {
+    $("form#characterForm").submit(function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        var formData = new FormData(this);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        console.log($(formData));
+        $.ajax({
+            type: 'POST',
+            url: '/practice/',
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function(data) {
+            console.log(data);
+            clearOldGame();
+            updateSentence(data);
+            text = data.plain_text;
+            initPlay();
+        });
+        
+    });
+    
+  }
+  
+  function updateSentence(data){
+    $("#speech source").attr("src", data.speech);
+    $("#speech")[0].load();
+    $("#originalText").text(data.sentence);
+    $("#pinyin").text(data.pinyin);
+    $("#english").text(data.english);
+  }
+
+  $( document ).ready(function() {
+    if ($("form#characterForm").length){
+      initFormSubmission();
+      console.log("yes")
+    } else {
+      initPlay();
+      console.log("no")
+    }
   });
 
 })();

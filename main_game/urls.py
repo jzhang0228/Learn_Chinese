@@ -14,4 +14,5 @@ urlpatterns = [
         views.UploadAudio.as_view(),
         name="upload_audio",
     ),
+    path("practice/", views.PracticeView.as_view(), name="practice"),
 ]
