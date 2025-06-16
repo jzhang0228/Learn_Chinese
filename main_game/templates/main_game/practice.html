@@ -1,0 +1,59 @@
+{% extends 'main_game/base.html'%}
+{% load static %}
+
+{% block extra_script %}
+  <script src="{% static 'bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'js/learn.js' %}"></script>
+  <script>
+    var csrfToken = '{{ csrf_token }}';
+    var text = '';
+  </script>
+{% endblock %}
+
+{% block main_body %}
+<div class="container-fluid form-group">
+  <form id="characterForm">
+    <label for="fname">Enter a Chinese charecter that you would like to learn:</label><br>
+    <input type="text" name="character"><br>
+    <input type="submit" value="Submit" class="btn btn-primary col-md-1">
+  </form>
+</div>
+
+<div>
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div class="audio-buttons clearfix">
+        <audio id="speech" controls class="pull-left">
+          <source src="" type="audio/mp3">
+        </audio>
+      </div>
+    </div>
+    <div class="row-fluid text-right">
+      <button type="button" class="btn btn-success btn-lg ready-button">Ready! Go!</button>
+      <span class="check-result hide">
+        <span class="glyphicon glyphicon-check text-success" aria-hidden="true">
+          <div class="check-result-number">0</div>
+        </span>
+        <span class="glyphicon glyphicon-remove text-danger" aria-hidden="true">
+          <div class="check-result-number">0</div>
+        </span>
+      </span>
+    </div>
+    <div class="row-fluid hide action-buttons">
+      <button id="startButton" type="button" class="btn btn-success btn-lg">Start</button>
+      <button id="checkButton" type="button" class="btn btn-success btn-lg" disabled="disabled">Check</button>
+      <button id="nextButton" type="button" class="btn btn-success btn-lg" disabled="disabled">Next</button>
+    </div>
+    <div class="row">
+      <div id="originalText" class="text-background"></div>
+      <div id="pinyin"></div>
+      <div id="english"></div>
+      <div id="main" class="col-md-10"></div>
+    </div>
+
+    <div class="row">
+      <div id="sentence" class="col-md-10"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
