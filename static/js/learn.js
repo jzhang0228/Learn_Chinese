@@ -1,4 +1,6 @@
 (function() {
+  var index;
+  var sentences;
 
   function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
@@ -169,8 +171,8 @@
   }
 
   function initPlay() {
-    var index = 0;
-    var sentences = JSON.parse(text);
+    index = 0;
+    sentences = JSON.parse(text);
 
     $(".ready-button").on('click touchstart', function(event) {
       $(this).addClass('hide');
@@ -183,7 +185,7 @@
         return;
       }
       startPlay(sentences[index]);
-      console.log(sentences[index]);
+
     });
 
     $("#checkButton").on('click touchstart', function(event) {
@@ -238,11 +240,11 @@
             text = data.plain_text;
             initPlay();
         });
-        
+
     });
-    
+
   }
-  
+
   function updateSentence(data){
     $("#speech source").attr("src", data.speech);
     $("#speech")[0].load();

@@ -1,16 +1,16 @@
 # ! encoding=utf8
 import json
-import re
-import json
 import os
 import random
-
-from openai import OpenAI
+import re
 from pathlib import Path
+
 from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.generic import View
-from django.http import JsonResponse
+
+from openai import OpenAI
 
 from .forms import AudioForm, LessonForm
 from .models import Lesson
@@ -21,6 +21,7 @@ def split_word(sentence):
     if " " in sentence:
         return sentence.split()
     return list(sentence)
+
 
 def get_sentence(text):
     trim_pattern = re.compile(r"^[,.;，。：]+|[,.;，。：]+$", re.UNICODE)
@@ -48,7 +49,7 @@ class LessonView(View):
         if not name:
             return None
         return name.rsplit(".", -1)[-1]
-    
+
     def get(self, request, lesson_id=None):
         lesson_id = lesson_id or 1
         lesson = Lesson.objects.get(id=lesson_id)
@@ -111,22 +112,30 @@ class PracticeView(View):
 
     def post(self, request):
         client = OpenAI()
-        character = request.POST.get("character", '好')  # Default to '好' if not provided
-        response = client.responses.create(
-            model="gpt-4.1",
-            input="""
-                Write a Chinese sentence with '%s‘, with the difficuty level of the character. 
-                Only output generated sentence, pinyin and English translation in JSON format 
-                with keys: sentence, pinyin and english
-            """ % character,
-        )
-        response_dict = json.loads(response.output_text)
+        character = request.POST.get("character", "好")
+        # response = client.responses.create(
+        #     model="gpt-4.1",
+        #     input="""
+        #         Write a Chinese sentence with '%s‘ with less than 10 characters.
+        #         Only output generated sentence, pinyin and English translation in
+        #         JSON format with keys: sentence, pinyin and english.
+        #     """ % character,
+        # )
+
+        # response_dict = json.loads(response.output_text)
+        response_dict = {
+            "sentence": "我喜欢咖啡,你呢？",
+            "pinyin": "wǒ xǐ huān hē kā fēi.",
+            "english": "I like to drink coffee.",
+        }
         print(response_dict)
-        
+
         random_number = random.randint(1, 10)
         audio_filename = "uploads/speech/%i.mp3" % random_number
         file_path = os.path.join(settings.MEDIA_ROOT, audio_filename)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True) # Create directory if it doesn't exist
+        os.makedirs(
+            os.path.dirname(file_path), exist_ok=True
+        )  # Create directory if it doesn't exist
         meida_file_path = os.path.join(settings.MEDIA_URL, audio_filename)
 
         with client.audio.speech.with_streaming_response.create(
@@ -141,7 +150,6 @@ class PracticeView(View):
         print(response_dict["pinyin"])
         print(response_dict["english"])
 
-
         context = {
             "sentence": response_dict["sentence"],
             "pinyin": response_dict["pinyin"],
@@ -149,5 +157,6 @@ class PracticeView(View):
             "speech": meida_file_path,
             "plain_text": get_sentence(response_dict["sentence"]),
         }
+        print(context["plain_text"])
 
         return JsonResponse(context)
