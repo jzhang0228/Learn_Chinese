@@ -126,8 +126,17 @@
 
   function getPraise() {
     const praises = [
-      'Great Job', 'Good Job', 'Excellent', 'Fantastic', 'Wonderful', 'Super',
-      'Marvelous', 'Brilliant', 'Awesome', 'Terrific', 'Well Done',
+      'Great Job', 'Excellent', 'Fantastic', 'Wonderful', 'Super',
+      'Marvelous', 'Brilliant', 'Awesome', 'Terrific', 'Well Done', 'Congratulations',
+      'Amazing', 'Outstanding', 'Impressive', 'Keep it up', 'You Rock', 'Great Work',
+      'Incredible', 'Fabulous', 'Remarkable', 'Respectable', 'Admirable', 'Superb',
+      'Exceptional', 'Top Notch', 'First Class', 'Astonishing', 'Stellar', 'Phenomenal',
+      'Unbelievable', 'Mind-blowing', 'Breathtaking', 'Jaw-dropping', 'Astounding',
+      'Extraordinary', 'Unparalleled', 'Unmatched', 'Unrivaled', 'Supreme', 'Elite',
+      'Champion', 'Heroic', 'Legendary', 'Epic', 'Majestic', 'Glorious', 'Radiant',
+      'Dazzling', 'Shining', 'Brilliantly Done', 'Exquisitely Executed', 'Flawless',
+      'Impeccable', 'Unforgettable', 'Triumphant', 'Victorious', 'Masterful',
+      'Skillful', 'Talented', 'Gifted', 'Prodigious', 'Exceptional Talent','Mom','铁鞋'
     ];
     return shuffle(praises)[0];
   }

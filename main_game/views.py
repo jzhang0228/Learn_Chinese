@@ -112,19 +112,25 @@ class PracticeView(View):
 
     def post(self, request):
         client = OpenAI()
-        character = request.POST.get("character", "好")
+        string = request.POST.get("character", "好")
+        if len(string) > 1:
+            characters = ', '.join(list(string))
+            print(characters)
+            prompt = "Write a Chinese sentence with of these characters '%s‘." % characters
+        else:
+            prompt = "Write a short Chinese sentence with the character '%s‘." % string
         response = client.responses.create(
             model="gpt-4.1",
             input="""
-                Write a Chinese sentence with '%s‘ with less than 10 characters.
-                Only output generated sentence, pinyin and English translation in
+                %s Only output generated sentence, pinyin and English translation in
                 JSON format with keys: sentence, pinyin and english.
             """
-            % character,
+            % prompt,
+            temperature=2,
         )
 
         response_dict = json.loads(response.output_text)
-
+        print(response_dict)
         random_number = random.randint(1, 10)
         audio_filename = "uploads/speech/%i.mp3" % random_number
         file_path = os.path.join(settings.MEDIA_ROOT, audio_filename)
