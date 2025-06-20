@@ -1,6 +1,7 @@
 (function() {
   var index;
   var sentences;
+  var originalText;
 
   function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
@@ -36,7 +37,6 @@
 
   function setCharacters(characters, selector, getHtmlCallBack) {
     var $container = $(selector);
-    console.log(selector);
     $container.html('');
     for (var i = 0; i < characters.length; i++) {
       var html = getHtmlCallBack(characters[i], i);
@@ -167,7 +167,7 @@
   }
 
   function showTryAgainMessage(success, fail, message) {
-    const DURATION = 5000;
+    const DURATION = 3000;
     var html = '<h1 class="try-again">' +
       '<div class="text-success">Succss: ' + success + '</div>' +
       '<div class="text-danger">Fail: ' + fail + ' </div>' +
@@ -175,13 +175,75 @@
     '</h1>';
     $('#main').html(html);
     setTimeout(function() {
-      location.reload();
+      reloadPlay();
     }, DURATION);
+  }
+
+  function reloadPlay() {
+    if ($("form#characterForm").length){
+      clearOldGame()
+      $("#originalText").text(originalText);
+      initPlay();
+    } else {
+      location.reload();
+    }
   }
 
   function initPlay() {
     index = 0;
     sentences = JSON.parse(text);
+  }
+
+  function clearOldGame() {
+    $(".ready-button").removeClass('hide');
+    $(".action-buttons, .check-result").addClass('hide');
+    $("#startButton").removeClass('hide');
+    $("#startButton").removeAttr('disabled');
+    $("#checkButton").attr('disabled', 'disabled');
+    $("#nextButton").attr('disabled', 'disabled');
+    $("#sentence").html('');
+    $('#main').html('');
+    $('.glyphicon-check .check-result-number').html('0');
+    $('.glyphicon-remove .check-result-number').html('0');
+  }
+
+  function initFormSubmission() {
+    $("form#characterForm").submit(function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        var formData = new FormData(this);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        $.ajax({
+            type: 'POST',
+            url: '/practice/',
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function(data) {
+            clearOldGame();
+            updateSentence(data);
+            originalText = data.sentence;
+            text = data.plain_text;
+            initPlay();
+        });
+
+    });
+
+  }
+
+  function updateSentence(data){
+    $("#speech source").attr("src", data.speech);
+    $("#speech")[0].load();
+    $("#originalText").text(data.sentence);
+    $("#pinyin").text(data.pinyin);
+    $("#english").text(data.english);
+  }
+
+  $( document ).ready(function() {
+    if ($("form#characterForm").length){
+      initFormSubmission();
+    } else {
+      initPlay();
+    }
 
     $(".ready-button").on('click touchstart', function(event) {
       $(this).addClass('hide');
@@ -217,59 +279,6 @@
         newPlay(sentences[index]);
       }
     });
-  }
-
-  function clearOldGame() {
-    $(".ready-button").removeClass('hide');
-    $(".action-buttons, .check-result").addClass('hide');
-    $("#startButton").removeClass('hide');
-    $("#startButton").removeAttr('disabled');
-    $("#checkButton").attr('disabled', 'disabled');
-    $("#nextButton").attr('disabled', 'disabled');
-    $("#sentence").html('');
-    $('#main').html('');
-  }
-
-  function initFormSubmission() {
-    $("form#characterForm").submit(function(event) {
-        event.preventDefault(); // Prevent the default form submission
-        var formData = new FormData(this);
-        formData.append('csrfmiddlewaretoken', csrfToken);
-        console.log($(formData));
-        $.ajax({
-            type: 'POST',
-            url: '/practice/',
-            data: formData,
-            processData: false,
-            contentType: false
-        }).done(function(data) {
-            console.log(data);
-            clearOldGame();
-            updateSentence(data);
-            text = data.plain_text;
-            initPlay();
-        });
-
-    });
-
-  }
-
-  function updateSentence(data){
-    $("#speech source").attr("src", data.speech);
-    $("#speech")[0].load();
-    $("#originalText").text(data.sentence);
-    $("#pinyin").text(data.pinyin);
-    $("#english").text(data.english);
-  }
-
-  $( document ).ready(function() {
-    if ($("form#characterForm").length){
-      initFormSubmission();
-      console.log("yes")
-    } else {
-      initPlay();
-      console.log("no")
-    }
   });
 
 })();
