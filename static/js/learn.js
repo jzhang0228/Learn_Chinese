@@ -211,23 +211,26 @@
     $("form#characterForm").submit(function(event) {
         event.preventDefault(); // Prevent the default form submission
         var formData = new FormData(this);
-        formData.append('csrfmiddlewaretoken', csrfToken);
-        $.ajax({
-            type: 'POST',
-            url: '/practice/',
-            data: formData,
-            processData: false,
-            contentType: false
-        }).done(function(data) {
-            clearOldGame();
-            updateSentence(data);
-            originalText = data.sentence;
-            text = data.plain_text;
-            initPlay();
-        });
-
+        submitForm(formData);
     });
 
+  }
+
+  function submitForm(formData) {
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    $.ajax({
+      type: 'POST',
+      url: '/practice/',
+      data: formData,
+      processData: false,
+      contentType: false
+    }).done(function(data) {
+        clearOldGame();
+        updateSentence(data);
+        originalText = data.sentence;
+        text = data.plain_text;
+        initPlay();
+    });
   }
 
   function updateSentence(data){
@@ -278,6 +281,14 @@
       } else {
         newPlay(sentences[index]);
       }
+    });
+
+    $(".saved_character").on('click touchstart', function(event) {
+      var character = $(this).html();
+      var count = $(this).attr('data-value');
+      var formData = new FormData();
+      formData.append('character', character);
+      submitForm(formData);
     });
   });
 

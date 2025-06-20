@@ -13,7 +13,7 @@ from django.views.generic import View
 from openai import OpenAI
 
 from .forms import AudioForm, LessonForm
-from .models import Lesson
+from .models import Character, Lesson
 
 
 def split_word(sentence):
@@ -107,18 +107,52 @@ class UploadAudio(View):
 
 
 class PracticeView(View):
+    def save_characters(self, characters):
+        for character in characters:
+            items = Character.objects.filter(character=character)
+            if not items:
+                Character.objects.create(character=character, right_count=0)
+
+    def success(self, characters):
+        for character in characters:
+            items = Character.objects.filter(character__in=characters)
+            for item in items:
+                item.right_count += 1
+                item.save()
+
+    def fail(self, characters):
+        for character in characters:
+            try:
+                item = Character.objects.get(character=character)
+                item.right_count = 0
+                item.save()
+            except model.DoesNotExist:
+                Characters.objects.create(character=character, right_count=0)
+
     def get(self, request):
-        return render(request, "main_game/practice.html", {})
+        characters = Character.objects.all()
+        context = {
+            "characters": [
+                {"character": c.character, "count": c.right_count} for c in characters
+            ],
+        }
+        print(context)
+        return render(request, "main_game/practice.html", context)
 
     def post(self, request):
         client = OpenAI()
         string = request.POST.get("character", "好")
         if len(string) > 1:
-            characters = ', '.join(list(string))
-            print(characters)
-            prompt = "Write a Chinese sentence with of these characters '%s‘." % characters
+            characters = list(string)
+            self.save_characters(characters)
+            prompt = (
+                "Write a Chinese sentence with of these characters '%s‘."
+                % ", ".join(characters)
+            )
         else:
+            self.save_characters([string])
             prompt = "Write a short Chinese sentence with the character '%s‘." % string
+
         response = client.responses.create(
             model="gpt-4.1",
             input="""

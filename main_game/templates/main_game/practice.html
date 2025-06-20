@@ -56,4 +56,17 @@
     </div>
   </div>
 </div>
+
+<div id="saved_characters" class="container-fluid">
+  {% for character in characters %}
+    <div class="row col-md-10">
+      <div class="pull-right">
+        <div class="character-container">
+          <div class="saved_character" data-value="{{ character.count }}">{{ character.character }}</div>
+          <div class="count-number">{{ character.count }}</div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
 {% endblock %}
