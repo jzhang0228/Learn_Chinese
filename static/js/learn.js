@@ -84,6 +84,9 @@
     var newClass;
     var succeed = true;
     var containers = $('#main .character-container');
+    var successCharacters = [];
+    var failedCharacters = [];
+
     containers.find('.glyphicon').addClass('hide');
     for (var i = 0; i < containers.length; i++) {
       $container = $(containers[i]);
@@ -91,10 +94,12 @@
       if ($character.attr('data-value') === $container.attr('data-value')) {
         newClass = 'bg-success';
         $container.find('.glyphicon-check').removeClass('hide');
+        successCharacters.push($container.attr('data-value'));
       } else {
         newClass = 'bg-danger';
         $container.find('.glyphicon-remove').removeClass('hide');
         succeed = false;
+        failedCharacters.push($container.attr('data-value'));
       };
       $container.removeClass('bg-success');
       $container.removeClass('bg-danger');
@@ -106,6 +111,7 @@
       $('#nextButton').removeAttr('disabled');
     }
     increaseNumber(succeed);
+    saveCharacters(successCharacters, failedCharacters);
   }
 
   function increaseNumber(succeed) {
@@ -230,6 +236,39 @@
         originalText = data.sentence;
         text = data.plain_text;
         initPlay();
+    });
+  }
+
+  function saveCharacters(successCharacters, failedCharacters) {
+    var formData = new FormData();
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    formData.append('successCharacters', JSON.stringify(successCharacters));
+    formData.append('failedCharacters', JSON.stringify(failedCharacters));
+    $.ajax({
+      type: 'POST',
+      url: '/save_characters/',
+      data: formData,
+      processData: false,
+      contentType: false
+    }).done(function(data) {
+      var containers = $('#saved_characters .character-container');
+      for (var i = 0; i < containers.length; i++) {
+        $container = $(containers[i]);
+        $character = $container.find('.saved_character');
+        console.log($character);
+        var saved_character = $character.html();
+        if (successCharacters.includes(saved_character)) {
+          var count = parseInt($container.find('.count-number').html());
+          if (count >= 6 ) {
+            // $container.html('');
+            $container.parent().parent().html('');
+          } else {
+            $container.find('.count-number').html(count + 1);
+          }
+        } else if (failedCharacters.includes(saved_character)) {
+          $container.find('.count-number').html("0");
+        }
+      }
     });
   }
 

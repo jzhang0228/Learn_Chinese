@@ -15,4 +15,7 @@ urlpatterns = [
         name="upload_audio",
     ),
     path("practice/", views.PracticeView.as_view(), name="practice"),
+    path(
+        "save_characters/", views.SaveCharactersView.as_view(), name="save_characters"
+    ),
 ]

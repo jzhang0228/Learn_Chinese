@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.generic import View
@@ -113,22 +114,6 @@ class PracticeView(View):
             if not items:
                 Character.objects.create(character=character, right_count=0)
 
-    def success(self, characters):
-        for character in characters:
-            items = Character.objects.filter(character__in=characters)
-            for item in items:
-                item.right_count += 1
-                item.save()
-
-    def fail(self, characters):
-        for character in characters:
-            try:
-                item = Character.objects.get(character=character)
-                item.right_count = 0
-                item.save()
-            except model.DoesNotExist:
-                Characters.objects.create(character=character, right_count=0)
-
     def get(self, request):
         characters = Character.objects.all()
         context = {
@@ -190,3 +175,30 @@ class PracticeView(View):
         }
 
         return JsonResponse(context)
+
+
+class SaveCharactersView(View):
+    def success(self, characters):
+        items = Character.objects.filter(character__in=characters)
+        for item in items:
+            if item.right_count >= 6:
+                item.delete()
+            else:
+                item.right_count += 1
+                item.save()
+
+    def fail(self, characters):
+        for character in characters:
+            try:
+                item = Character.objects.get(character=character)
+                item.right_count = 0
+                item.save()
+            except ObjectDoesNotExist:
+                Character.objects.create(character=character, right_count=0)
+
+    def post(self, request):
+        success_characters = json.loads(request.POST.get("successCharacters", "[]"))
+        failed_characters = json.loads(request.POST.get("failedCharacters", "[]"))
+        self.success(success_characters)
+        self.fail(failed_characters)
+        return JsonResponse({"success": True})
