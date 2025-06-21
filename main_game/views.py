@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 from django.views.generic import View
 
 from openai import OpenAI
@@ -125,19 +126,30 @@ class PracticeView(View):
         return render(request, "main_game/practice.html", context)
 
     def post(self, request):
-        client = OpenAI()
-        string = request.POST.get("character", "好")
-        if len(string) > 1:
-            characters = list(string)
-            self.save_characters(characters)
+        is_random = request.POST.get("random", False)
+        if is_random:
+            characters = Character.objects.all()
+            characters = [c.character for c in characters]
+            character = random.choice(characters)
             prompt = (
-                "Write a Chinese sentence with of these characters '%s‘."
-                % ", ".join(characters)
+                "Write a short Chinese sentence with the character '%s‘." % character
             )
         else:
-            self.save_characters([string])
-            prompt = "Write a short Chinese sentence with the character '%s‘." % string
+            string = request.POST.get("character", "好")
+            if len(string) > 1:
+                characters = list(string)
+                self.save_characters(characters)
+                prompt = (
+                    "Write a Chinese sentence with of these characters '%s‘."
+                    % ", ".join(characters)
+                )
+            else:
+                self.save_characters([string])
+                prompt = (
+                    "Write a short Chinese sentence with the character '%s‘." % string
+                )
 
+        client = OpenAI()
         response = client.responses.create(
             model="gpt-4.1",
             input="""
@@ -148,6 +160,7 @@ class PracticeView(View):
             temperature=2,
         )
 
+        print(response.output_text)
         response_dict = json.loads(response.output_text)
         print(response_dict)
         random_number = random.randint(1, 10)
@@ -201,4 +214,15 @@ class SaveCharactersView(View):
         failed_characters = json.loads(request.POST.get("failedCharacters", "[]"))
         self.success(success_characters)
         self.fail(failed_characters)
-        return JsonResponse({"success": True})
+        characters = Character.objects.all()
+        context = {
+            "characters": [
+                {"character": c.character, "count": c.right_count} for c in characters
+            ],
+        }
+        return JsonResponse(
+            {
+                "success": True,
+                "html": render_to_string("main_game/saved_characters.html", context),
+            }
+        )

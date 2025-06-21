@@ -1,0 +1,6 @@
+{% for character in characters %}
+    <div class="saved_character-container">
+        <div class="saved_character" data-value="{{ character.count }}">{{ character.character }}</div>
+        <div class="count-number">{{ character.count }}</div>
+    </div>
+{% endfor %}

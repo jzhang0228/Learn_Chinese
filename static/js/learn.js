@@ -239,6 +239,12 @@
     });
   }
 
+  function submitRandomCharacter() {
+    var formData = new FormData();
+      formData.append('random', true);
+      submitForm(formData);
+  }
+
   function saveCharacters(successCharacters, failedCharacters) {
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', csrfToken);
@@ -251,24 +257,18 @@
       processData: false,
       contentType: false
     }).done(function(data) {
-      var containers = $('#saved_characters .character-container');
-      for (var i = 0; i < containers.length; i++) {
-        $container = $(containers[i]);
-        $character = $container.find('.saved_character');
-        console.log($character);
-        var saved_character = $character.html();
-        if (successCharacters.includes(saved_character)) {
-          var count = parseInt($container.find('.count-number').html());
-          if (count >= 6 ) {
-            // $container.html('');
-            $container.parent().parent().html('');
-          } else {
-            $container.find('.count-number').html(count + 1);
-          }
-        } else if (failedCharacters.includes(saved_character)) {
-          $container.find('.count-number').html("0");
-        }
-      }
+      $('#saved_characters').html(data.html);
+      initSavedCharacters();
+    });
+  }
+
+  function initSavedCharacters() {
+    $(".saved_character").on('click touchstart', function(event) {
+      var character = $(this).html();
+      var count = $(this).attr('data-value');
+      var formData = new FormData();
+      formData.append('character', character);
+      submitForm(formData);
     });
   }
 
@@ -283,6 +283,7 @@
   $( document ).ready(function() {
     if ($("form#characterForm").length){
       initFormSubmission();
+      submitRandomCharacter();
     } else {
       initPlay();
     }
@@ -322,13 +323,7 @@
       }
     });
 
-    $(".saved_character").on('click touchstart', function(event) {
-      var character = $(this).html();
-      var count = $(this).attr('data-value');
-      var formData = new FormData();
-      formData.append('character', character);
-      submitForm(formData);
-    });
+    initSavedCharacters();
   });
 
 })();

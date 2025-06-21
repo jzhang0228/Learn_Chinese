@@ -22,6 +22,7 @@
 
 #sentence {
   margin-top: 50px;
+  margin-bottom: 50px;
 }
 
 .text-background span, .text-background p {
@@ -138,13 +139,33 @@ canvas {
 
 .count-number {
   position: absolute;
-  top: -10px;
-  right: -5px;
+  top: -8px;
+  right: -4px;
   font-size: 20px;
+  color: darkred;
+}
+
+.saved_character-container {
+  position: relative;
+  text-align: center;
+  height: 80px;
+  border: 1px solid #afd298;
+  padding-left: 0;
+  padding-right: 0;
+  margin: 1px;
+  background-color: rgba(255, 255, 0255, 0.7);
+  float: right;
+  min-width: 70px;
+  padding: 10px;
 }
 
 .saved_character {
   font-family: "楷体";
-  font-size: 50px;
+  font-size: 40px;
   cursor: pointer;
+}
+
+#characterForm {
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
